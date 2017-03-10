@@ -111,10 +111,19 @@ def compEntropy(arr):
   return result
 
 # Computes information gain for a particular attribute
-def infoGain(data, attribute):
-  attrCount = count(data, attribute)
+# Information gain is 
+def infoGain(data, attribute, labels):
+  # Gets count for the [0,1] distribution of this attribute for each label
+  attrCount = count(data, attribute, labels)
 
-  total = attrCount[0] + attrCount[1] + attrCount[2] + attrCount[3]
+  totalZero = 0
+  totalOne = 0
+  for item in attrCount:
+    totalZero += item[0]
+    totalOne += item[1]
+  total = totalZero + totalOne
+
+
   totalZero = attrCount[0] + attrCount[2]
   totalOne = attrCount[1] + attrCount[3]
   firstAttr = attrCount[0] + attrCount[1]
@@ -134,12 +143,12 @@ def infoGain(data, attribute):
   return result
 
 # Find the best variable to split on, according to mutual information
-def bestVar(data, varnames):
+def bestVar(data, varnames, labels):
   varList = []
   for i,var in enumerate(varnames):
     if i != (len(varnames) - 1):
       if var != "":
-        varList.append((infoGain(data, i), i))
+        varList.append((infoGain(data, i, labels), i))
   varList.sort(reverse=True)
 
   return varList[0]
