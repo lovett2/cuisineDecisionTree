@@ -72,7 +72,7 @@ def count(data, attribute, labels):
       for i in range(len(labels)):
         if d[len(d)-1] == i:
             count[i][0] += 1
-    else:
+    elif d[attribute] == 1:
       for i in range(len(labels)):
         if d[len(d)-1] == i:
           count[i][1] += 1
@@ -85,29 +85,37 @@ def count(data, attribute, labels):
         arr: distribution array, should use result of count
     returns:
         result: entropy
-'''
-def compEntropy(arr):
-  total = 0
-  for each in arr:
-    total += sum(each)
+        
+    ---> NOTES FOR KATHRYN <3
+    for calculating gain-->
+    
+    zero = []
+    one = []
+    total = []
+    for each in attrCount:
+        zero.append(each[0])
+        one.append(each[1])
+        total.append(each[0]+each[1])
+    zeroValue = sum(zero)
+    oneValue = sum(one)
+    totalValue = zeroValue + oneValue
+    
+    firstAttrEntropy = (totalZero/totalValue)*compEntropy(zero)
+    secondAttrEntropy = (totalOne/totalValue)*compEntropy(one)
+    dataEntropy = compEntropy(total)
+    
+    return dataEntropy - firstAttrEntropy - secondAttrEntropy
+    '''
+def compEntropy(distr):
+  # total number of distributions, denominator
+  total = sum(distr)
   result = 0
-  for x in arr:
-    neg = x[0]
-    pos = x[1]
-    first = 0
-    second = 0
-    if neg == 0:
-      first = 0
-    elif neg != 0:
-      first = (-1)*(neg/total)*math.log((neg/total), 2)
-
-    if pos == 0:
-      second = 0
-    elif pos != 0:
-      second = (pos/total)*math.log((pos/total), 2)
-
-    result += first - second
-
+  #for each value in distr array, compute log
+  for x in distr:
+    if x == 0:
+      result += 0
+    else:
+      result += (-1)*(x/total)*math.log((x/total), 2)
   return result
 
 # Computes information gain for a particular attribute
@@ -122,7 +130,6 @@ def infoGain(data, attribute, labels):
     totalZero += item[0]
     totalOne += item[1]
   total = totalZero + totalOne
-
 
   totalZero = attrCount[0] + attrCount[2]
   totalOne = attrCount[1] + attrCount[3]
