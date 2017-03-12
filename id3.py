@@ -10,9 +10,10 @@ from __future__ import division
 import sys
 import re
 # Node class for the decision tree
-import node
+#import node
 import math
 import json
+from operator import itemgetter
 
 
 # SUGGESTED HELPER FUNCTIONS:
@@ -29,26 +30,44 @@ def read_data(filename):
     data = json.load(json_data)
   labels = []
   ingredients = []
+  ingredientsDict = {}
   for item in data:
     if item.get('cuisine') not in labels:
       labels.append(item.get('cuisine'))
 
     for ingredient in item.get('ingredients'):
-      if ingredient not in ingredients:
-        ingredients.append(ingredient)
+      if ingredient not in ingredientsDict.keys():
+        #ingredients.append(ingredient)
+        ingredientsDict[ingredient] = 1
+      else:
+        ingredientsDict[ingredient] += 1
+  lst = sorted(ingredientsDict.iteritems(), key=itemgetter(1), reverse = True)
+  i = 0
+  for t in lst:
+    ingredients.append(t[0])
+    i += 1
+    if i == 30: break
 
   examples = []
   for item in data:
     new = [0]*len(ingredients)
     for i in item.get('ingredients'):
-      index = ingredients.index(i)
-      new[index] = 1
+      if i in ingredients:
+        index = ingredients.index(i)
+        new[index] = 1
     new[-1] = labels.index(item.get('cuisine'))
     examples.append(new)
 
   return (examples), (labels)
 
-# Saves the model to a file.  Most of the work here is done in the 
+def ingredientsCounter(ingredient, ingredientsDict):
+  if ingredient not in ingredientsDict.keys():
+    ingredientsDict[ingredient] = 1
+  else:
+    ingredientsDict[ingredient] += 1
+  return ingredientsDict
+
+# Saves the model to a file.  Most of the work here is done in the
 # node class.  This should work as-is with no changes needed.
 def print_model(root, modelfile):
   f = open(modelfile, 'w+')
