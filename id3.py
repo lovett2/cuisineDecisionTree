@@ -22,6 +22,8 @@ import json
 # - find the best variable to split on, according to mutual information
 # - partition data based on a given variable 
 
+MAX_ITER = 10
+CUR_ITER = 0
 
 # Load data from a file
 def read_data(filename):
@@ -184,6 +186,7 @@ def partition(data, attribute):
 # pure leaf or all splits look bad.
 def build_tree(data, ingredients, labels):
   # >>>> YOUR CODE GOES HERE <<<<
+  global CUR_ITER
   guess = [0]*(len(labels))
   for item in data:
     index = item[len(item)-1]
@@ -210,7 +213,10 @@ def build_tree(data, ingredients, labels):
     return node.Leaf(ingredients, g)
   elif not moreFeatures:
     return node.Leaf(ingredients, g)
+  elif CUR_ITER == MAX_ITER:
+    return node.Leaf(ingredients, g)
   else:
+    CUR_ITER += 1
     print "Finding best var"
     (value, index) = bestVar(data, ingredients, labels)
     (no, yes) = partition(data, index)
@@ -223,7 +229,8 @@ def build_tree(data, ingredients, labels):
 
 # Load train and test data.  Learn model.  Report accuracy.
 def main(argv):
-
+  global CUR_ITER
+  CUR_ITER = 0
   if (len(argv) != 3):
     print 'Usage: id3.py <train> <test> <model>'
     sys.exit(2)
