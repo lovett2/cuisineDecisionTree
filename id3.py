@@ -10,11 +10,13 @@ from __future__ import division
 import sys
 import re
 # Node class for the decision tree
-#import node
+import node
 import math
 import json
 from operator import itemgetter
 
+MAX_ITER = 10
+CUR_ITER = 0
 
 # SUGGESTED HELPER FUNCTIONS:
 # - compute entropy of a 2-valued (Bernoulli) probability distribution 
@@ -46,11 +48,11 @@ def read_data(filename):
   for t in lst:
     ingredients.append(t[0])
     i += 1
-    if i == 30: break
+    if i == 31: break
 
   examples = []
   for item in data:
-    new = [0]*len(ingredients)
+    new = [0]*(len(ingredients)+1)
     for i in item.get('ingredients'):
       if i in ingredients:
         index = ingredients.index(i)
@@ -58,7 +60,7 @@ def read_data(filename):
     new[-1] = labels.index(item.get('cuisine'))
     examples.append(new)
 
-  return (examples), (labels)
+  return (examples), (labels), (ingredients)
 
 def ingredientsCounter(ingredient, ingredientsDict):
   if ingredient not in ingredientsDict.keys():
@@ -87,14 +89,14 @@ def print_model(root, modelfile):
 def count(data, attribute, labels):
   count = [[0]*2 for _ in range(len(labels))]
   for d in data:
+    i = d[len(d)-1]
+    # print "i is ", i
+    # print d[attribute]
     if d[attribute] == 0:
-      for i in range(len(labels)):
-        if d[len(d)-1] == i:
-            count[i][0] += 1
+      count[i][0] = count[i][0] + 1
+      # print "count[i][0] is ", count[i][0]
     else:
-      for i in range(len(labels)):
-        if d[len(d)-1] == i:
-          count[i][1] += 1
+      count[i][1] = count[i][1] + 1
   return count
 
 '''
@@ -105,27 +107,15 @@ def count(data, attribute, labels):
     returns:
         result: entropy
 '''
-def compEntropy(arr):
-  total = 0
-  for each in arr:
-    total += sum(each)
+def compEntropy(distr):
+  total = sum(distr)
   result = 0
-  for x in arr:
-    neg = x[0]
-    pos = x[1]
-    first = 0
-    second = 0
-    if neg == 0:
-      first = 0
-    elif neg != 0:
-      first = (-1)*(neg/total)*math.log((neg/total), 2)
-
-    if pos == 0:
-      second = 0
-    elif pos != 0:
-      second = (pos/total)*math.log((pos/total), 2)
-
-    result += first - second
+  #for each value in distr array, compute log
+  for x in distr:
+    if x == 0:
+      result += 0
+    else:
+      result += (-1)*(x/total)*math.log((x/total),2)
 
   return result
 
@@ -135,41 +125,36 @@ def infoGain(data, attribute, labels):
   # Gets count for the [0,1] distribution of this attribute for each label
   attrCount = count(data, attribute, labels)
 
-  totalZero = 0
-  totalOne = 0
+  totalZero = []
+  totalOne = []
+  total = []
   for item in attrCount:
-    totalZero += item[0]
-    totalOne += item[1]
-  total = totalZero + totalOne
-
-
-  totalZero = attrCount[0] + attrCount[2]
-  totalOne = attrCount[1] + attrCount[3]
-  firstAttr = attrCount[0] + attrCount[1]
-  secAttr = attrCount[2] + attrCount[3]
-
-  dataEntropy = compEntropy(totalZero, totalOne)
-  if firstAttr != 0:
-    firstAttrEntropy = (firstAttr/total)*compEntropy(attrCount[0], attrCount[1])
-  else:
+    totalZero.append(item[0])
+    totalOne.append(item[1])
+    total.append(item[0]+item[1])
+  zeroValue = sum(totalZero)
+  oneValue = sum(totalOne)
+  totalValue = zeroValue + oneValue
+  # print zeroValue
+  # print oneValue
+  if totalValue == 0:
     firstAttrEntropy = 0
-  if secAttr != 0:
-    secAttrEntropy = (secAttr/total)*compEntropy(attrCount[2], attrCount[3])
-  else:
     secAttrEntropy = 0
+  else:
+    firstAttrEntropy = (zeroValue/totalValue)*compEntropy(totalZero)
+    secAttrEntropy = (oneValue/totalValue)*compEntropy(totalOne)
+  dataEntropy = compEntropy(total)
 
-  result = dataEntropy - firstAttrEntropy - secAttrEntropy
-  return result
+  return dataEntropy - firstAttrEntropy - secAttrEntropy
 
 # Find the best variable to split on, according to mutual information
 def bestVar(data, varnames, labels):
   varList = []
   for i,var in enumerate(varnames):
-    if i != (len(varnames) - 1):
-      if var != "":
-        varList.append((infoGain(data, i, labels), i))
+    # if i != (len(varnames) - 1):
+    if var != "":
+      varList.append((infoGain(data, i, labels), i))
   varList.sort(reverse=True)
-
   return varList[0]
 
 # Partition data based on a given variable 
@@ -186,34 +171,53 @@ def partition(data, attribute):
 
 # Build tree in a top-down manner, selecting splits until we hit a
 # pure leaf or all splits look bad.
-def build_tree(data):
+def build_tree(data, ingredients, labels):
   # >>>> YOUR CODE GOES HERE <<<<
-  # Need to get rid of areas where varnames is referenced - don't have set number
-  # of attributes/ingredients
-  guess = count(data, (len(varnames) - 1))
-  if guess[0] > guess[3]:
-    g = 0
-  else:
-    g = 1
+  # global CUR_ITER
+  guess = [0]*(len(labels))
+  for item in data:
+    index = item[len(item)-1]
+    # print index
+    # print "Old guess[index] ", guess[index]
+    guess[index] = guess[index] + 1
+    # print "New guess[index] ", guess[index]
+  print guess
+  g = 0
+  gIndex = 0
+  oneLabel = 0
+
+  for item in guess:
+    if item > 0:
+      oneLabel += 1
+    if item > g:
+      g = item
+      gIndex = guess.index(item)
 
   moreFeatures = False 
-  for v in varnames:
-    if v != "Class" and v != "":
+  for i in ingredients:
+    if i != "":
       moreFeatures = True
-
-  if guess[0] == 0 or guess[3] == 0:
-    return node.Leaf(varnames, g)
+  if oneLabel <= 1:
+    print "Only one label", gIndex
+    return node.Leaf(ingredients, gIndex)
   elif not moreFeatures:
-    return node.Leaf(varnames, g)
+    return node.Leaf(ingredients, gIndex)
+  # elif CUR_ITER == MAX_ITER:
+  #   return node.Leaf(ingredients, g)
   else:
-    (value, index) = bestVar(data, varnames)
+    # # CUR_ITER += 1
+    # print "Finding best var"
+    (value, index) = bestVar(data, ingredients, labels)
+    if value <= 0:
+      return node.Leaf(ingredients, gIndex)
     (no, yes) = partition(data, index)
-    var = list(varnames)
+    var = list(ingredients)
     var[index] = ""
-    left = build_tree(no, var)
-    right = build_tree(yes, var)
 
-    return node.Split(varnames, index, left, right)
+    left = build_tree(no, var, labels)
+    right = build_tree(yes, var, labels)
+    return node.Split(ingredients, index, left, right)
+    # return node.Leaf(ingredients, g)
 
 # Load train and test data.  Learn model.  Report accuracy.
 def main(argv):
@@ -224,16 +228,22 @@ def main(argv):
   # "train" and "test" are lists of examples.  
   # Each example is a list of attribute values, where the last element in
   # the list is the class value.
-  (train), (labels) = read_data(argv[0])
+  (train), (labels), (ingredients) = read_data(argv[0])
+  
+  halfTrain = int(len(train)/2)
+
+  new_train = train[0:halfTrain]
+  test = train[halfTrain:len(train)]
   #(test) = read_data(argv[1])
   modelfile = argv[2]
 
   # build_tree is the main function you'll have to implement, along with
   # any helper functions needed.  It should return the root node of the
   # decision tree.
-''' root = build_tree(train)
+  root = build_tree(new_train, ingredients, labels)
 
   print_model(root, modelfile)
+
   correct = 0
   # The position of the class label is the last element in the list.
   yi = len(test[0]) - 1
@@ -245,6 +255,6 @@ def main(argv):
       correct += 1
   acc = float(correct)/len(test)
   print "Accuracy: ",acc
-'''
+
 if __name__ == "__main__":
   main(sys.argv[1:])
