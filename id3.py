@@ -38,9 +38,9 @@ def read_data(filename):
       labels.append(item.get('cuisine'))
 
     for ingredient in item.get('ingredients'):
+      thisIngredient = ingredient.encode('ascii', 'ignore').decode('ascii')
       if ingredient not in ingredientsDict.keys():
         #ingredients.append(ingredient)
-        thisIngredient = ingredient.encode('ascii', 'ignore').decode('ascii')
         ingredientsDict[thisIngredient] = 1
       else:
         ingredientsDict[thisIngredient] += 1
@@ -50,7 +50,7 @@ def read_data(filename):
   for t in lst:
     ingredients.append(t[0])
     i += 1
-    if i == 201: break
+    if i == 300: break
 
   examples = []
   for item in data:
