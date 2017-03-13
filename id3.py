@@ -40,9 +40,11 @@ def read_data(filename):
     for ingredient in item.get('ingredients'):
       if ingredient not in ingredientsDict.keys():
         #ingredients.append(ingredient)
-        ingredientsDict[ingredient] = 1
+        thisIngredient = ingredient.encode('ascii', 'ignore').decode('ascii')
+        ingredientsDict[thisIngredient] = 1
       else:
-        ingredientsDict[ingredient] += 1
+        ingredientsDict[thisIngredient] += 1
+
   lst = sorted(ingredientsDict.iteritems(), key=itemgetter(1), reverse = True)
   i = 0
   for t in lst:
