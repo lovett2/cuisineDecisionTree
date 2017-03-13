@@ -48,7 +48,7 @@ def read_data(filename):
   for t in lst:
     ingredients.append(t[0])
     i += 1
-    if i == 31: break
+    if i == 201: break
 
   examples = []
   for item in data:
@@ -61,13 +61,6 @@ def read_data(filename):
     examples.append(new)
 
   return (examples), (labels), (ingredients)
-
-def ingredientsCounter(ingredient, ingredientsDict):
-  if ingredient not in ingredientsDict.keys():
-    ingredientsDict[ingredient] = 1
-  else:
-    ingredientsDict[ingredient] += 1
-  return ingredientsDict
 
 # Saves the model to a file.  Most of the work here is done in the
 # node class.  This should work as-is with no changes needed.
@@ -230,10 +223,10 @@ def main(argv):
   # the list is the class value.
   (train), (labels), (ingredients) = read_data(argv[0])
   
-  halfTrain = int(len(train)/2)
-
-  new_train = train[0:halfTrain]
-  test = train[halfTrain:len(train)]
+  fourthTrain = int(len(train)/4)
+  threeFourths = len(train) - fourthTrain
+  new_train = train[0:threeFourths]
+  test = train[threeFourths:len(train)]
   #(test) = read_data(argv[1])
   modelfile = argv[2]
 
