@@ -39,7 +39,7 @@ K = 20
 # Neural Network function
 def neural_net(X, Y):
   # Run gradient descent
-  print len(X)
+  XI = np.array(X)
   N = K * (len(X)-1)
   eta = 1
   max_iter = 1000
@@ -48,14 +48,15 @@ def neural_net(X, Y):
   for t in range(0, max_iter):
     grad_t = np.zeros((100, 100))
     for i in range(0, N):
-      x_i = X[i]
+      x_i = XI[i, :]
       y_i = Y[i][0]
-      #print "x_i:", x_i
-      #print "y_i:", y_i
+      print "x_i:", x_i
+      print "y_i:", y_i
       #print "w:", w
       
       exp_vals = np.exp(w.dot(x_i))
       lik = exp_vals[int(y_i)]/np.sum(exp_vals)
+      print "lik:", lik
       grad_t[int(y_i), :] += x_i*(1-lik)
     w = w + 1/float(N)*eta*grad_t
     grad_norm = np.linalg.norm(grad_t)
