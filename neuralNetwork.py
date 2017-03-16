@@ -49,7 +49,7 @@ def neural_net(X, Y):
     grad_t = np.zeros((100, 100))
     for i in range(0, N):
       x_i = X[i]
-      y_i = Y[i]
+      y_i = Y[i][0]
       #print "x_i:", x_i
       #print "y_i:", y_i
       #print "w:", w
