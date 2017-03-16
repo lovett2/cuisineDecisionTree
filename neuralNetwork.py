@@ -40,9 +40,10 @@ K = 20
 def neural_net(X, Y):
   # Run gradient descent
   XI = np.array(X)
-  N = K * (len(X)-1)
+  #N = K * (len(XI)-1)
+  N = len(XI)-1
   eta = 1
-  max_iter = 1000
+  max_iter = 100
   w = np.zeros((100, 100))
   grad_thresh = 5 
   for t in range(0, max_iter):
