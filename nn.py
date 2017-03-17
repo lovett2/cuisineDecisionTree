@@ -57,27 +57,33 @@ def main(argv):
         sys.exit(2)
     (examples), (output) = read_data(argv[0])
     print("read data complete.")
+    #transform our current dataset to a np array
+    #I don't know what np exactly does but sklearn wants us to use it :P
     x = np.array(examples)
     y = np.array(output)
 
+    #split our data into train set and test set, using sklearn method train_test_split.
+    #usually, 75% of data goes to train and the rest 25% for test.
     X_train, X_test, y_train, y_test = train_test_split(x, y)
-    print("split train and test data")
+    print("X_train", X_train.shape, "X_test", X_test.shape)
 
+    #there are 4 hidden layers with 10 nodes in each hidden layer
+    #this is where we set what we want for our model
+    mlp = MLPClassifier(hidden_layer_sizes=(20,10,10))
+    print("initialized classifier")
 
-    mlp = MLPClassifier(hidden_layer_sizes=(30,30,30))
-
+    #create our model using the training data
     mlp.fit(X_train,y_train)
     print("finished fit")
 
+    #make predictions on test set using our model
     predictions = mlp.predict(X_test)
     print("finished predictions")
 
     #print(confusion_matrix(y_test,predictions))
+
+    #print the accuracy report
     print(classification_report(y_test,predictions))
-
-
-
-
 
 if __name__ == "__main__":
     main(sys.argv[1:])
