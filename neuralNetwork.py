@@ -43,7 +43,7 @@ def neural_net(X, Y):
   #N = K * (len(XI)-1)
   N = len(XI)-1
   eta = 1
-  max_iter = 100
+  max_iter = 10
   w = np.zeros((100, 100))
   grad_thresh = 5 
   for t in range(0, max_iter):
@@ -72,16 +72,18 @@ def neural_net(X, Y):
 
   # Begin plotting here
   # Define our class colors
-  cmap_light = ListedColormap(['#FFAAAA', '#AAAAFF', '#AAFFAA'])
+  cmap_light = ListedColormap(['#FFAAAA', '#AAAAFF', '#AAFFAA', '#f442e2', '#f47a42', '#86f441', '#41f4b2', 
+    '#7f41f4', '#351b72', '#f95c71', '#cc4f02', '#096d26', '#7bedd2', '#0415d1', '#c69aed', '#a00359', '#842323',
+    '#9be506', '#3e8e59', '#03687c'])
 
   # Generate the mesh
-  x_min, x_max = X[:, 1].min() - 0.5, X[:, 1].max() + 0.5
-  y_min, y_max = X[:, 2].min() - 0.5, X[:, 2].max() + 0.5
+  x_min, x_max = XI[:, 1].min() - 0.5, XI[:, 1].max() + 0.5
+  y_min, y_max = XI[:, 2].min() - 0.5, XI[:, 2].max() + 0.5
   h = 0.02 # step size in the mesh
   xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
   X_mesh = np.c_[np.ones((xx.size, 1)), xx.ravel(), yy.ravel()]
   Z = np.zeros((xx.size, 1))
-
+  print "xx meshgrid: ", xx
   # Compute the likelihood of each cell in the mesh
   for i in range(0, xx.size):
       lik = w.dot(X_mesh[i, :])
@@ -91,9 +93,9 @@ def neural_net(X, Y):
   Z = Z.reshape(xx.shape)
   plt.figure()
   plt.pcolormesh(xx, yy, Z, cmap=cmap_light)
-  plt.plot(X[0:N_c-1, 1], X[0:N_c-1, 2], 'ro', X[N_c:2*N_c-1, 1], X[N_c:2*N_c-1,
-      2], 'bo', X[2*N_c:, 1], X[2*N_c:, 2], 'go')
-  plt.axis([np.min(X[:, 1])-0.5, np.max(X[:, 1])+0.5, np.min(X[:, 2])-0.5, np.max(X[:, 2])+0.5])
+  plt.plot(XI[0:N_c-1, 1], XI[0:N_c-1, 2], 'ro', XI[N_c:2*N_c-1, 1], XI[N_c:2*N_c-1,
+      2], 'bo', XI[2*N_c:, 1], XI[2*N_c:, 2], 'go')
+  plt.axis([np.min(XI[:, 1])-0.5, np.max(XI[:, 1])+0.5, np.min(XI[:, 2])-0.5, np.max(XI[:, 2])+0.5])
   plt.show()
 
 # Load data from a file
