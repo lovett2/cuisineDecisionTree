@@ -52,8 +52,8 @@ def read_data(filename):
     return (examples), (output)
 
 def main(argv):
-    if (len(argv) != 3):
-        print ("Usage: id3.py <train> <test> <model>")
+    if (len(argv) != 1):
+        print ("Usage: id3.py <train>")
         sys.exit(2)
     (examples), (output) = read_data(argv[0])
     print("read data complete.")
